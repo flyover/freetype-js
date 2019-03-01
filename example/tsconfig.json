@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "ES2016",
+    "module": "system",
+    "moduleResolution": "node",
+    "inlineSourceMap": true,
+    "strict": true,
+    "baseUrl": ".",
+    "paths": {
+      "freetype-js": [ ".." ],
+      "freetype-js/*": [ "../*" ]
+    }
+  },
+  "files": [
+    "main.ts"
+  ]
+}

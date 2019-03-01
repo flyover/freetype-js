@@ -1,0 +1,50 @@
+{
+  "name": "freetype-js",
+  "version": "1.0.0",
+  "description": "JavaScript bindings for FreeType using Emscripten and TypeScript",
+  "main": "freetype.js",
+  "types": "freetype.ts",
+  "scripts": {
+    "build": "make build-bind-freetype && npm run build-freetype",
+    "clean": "make clean-bind-freetype && npm run clean-freetype",
+    "watch": "npm run watch-example",
+    "start": "npm run start-example",
+    "dist": "rollup -c",
+    "build-freetype": "tsc",
+    "watch-freetype": "tsc --watch",
+    "clean-freetype": "echo TODO: clean-freetype",
+    "build-example": "tsc -p example",
+    "watch-example": "tsc -p example --watch",
+    "clean-example": "echo TODO: clean-example",
+    "start-example": "npm run start-example-html",
+    "start-example-html": "echo http://localhost:8080/example/index.html && http-server -c-1 -o",
+    "start-example-node": "node example/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/flyover/freetype-js.git"
+  },
+  "author": "Isaac Burns <isaacburns@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/flyover/freetype-js/issues"
+  },
+  "homepage": "https://github.com/flyover/freetype-js#readme",
+  "dependencies": {
+    "@types/emscripten": "0.0.31",
+    "@types/node": "^10.12.27",
+    "@types/systemjs": "^0.20.6"
+  },
+  "devDependencies": {
+    "http-server": "^0.11.1",
+    "node-fetch": "^2.2.0",
+    "rollup": "^0.68.2",
+    "rollup-plugin-commonjs": "^9.2.1",
+    "rollup-plugin-node-builtins": "^2.1.2",
+    "rollup-plugin-typescript2": "^0.18.1",
+    "source-map-support": "^0.5.10",
+    "systemjs": "^0.21.6",
+    "typescript": "^3.3.3333"
+  }
+}
