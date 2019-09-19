@@ -1,7 +1,7 @@
 import * as Emscripten from "./emscripten";
 
 // emcc -s MODULARIZE=0
-// declare const Module: ImGuiModule; export default Module;
+// declare const Module: Module; export default Module;
 
 // emcc -s MODULARIZE=1
 export default function Module(Module?: Partial<Module>): Promise<Module>;

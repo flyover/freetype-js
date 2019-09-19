@@ -40,23 +40,6 @@ export default async function main(): Promise<void> {
 
   const charset: string[] = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~".split("");
 
-  let ctx: CanvasRenderingContext2D | null = null;
-
-  if (typeof document !== "undefined") {
-    const canvas: HTMLCanvasElement = document.body.appendChild(document.createElement("canvas"));
-    ctx = canvas.getContext("2d");
-  }
-
-  if (ctx !== null) {
-    ctx.translate(10, ctx.canvas.height - 10);
-    ctx.scale(1, -1);
-
-    ctx.strokeStyle = "cyan";
-    ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(ctx.canvas.width, 0); ctx.stroke();
-  }
-
-  let prev_char: string = "";
-
   for (const char of charset) {
     const char_code: number = char.charCodeAt(0);
     console.log(char, char_code);
@@ -106,51 +89,59 @@ export default async function main(): Promise<void> {
       console.log(text);
     }
 
-    if (ctx !== null) {
-      ctx.strokeStyle = "magenta";
-      const x: number = ft_glyph.metrics.horiBearingX * ft_scale;
-      const y: number = (ft_glyph.metrics.horiBearingY - ft_glyph.metrics.height) * ft_scale;
-      const w: number = ft_glyph.metrics.width * ft_scale;
-      const h: number = ft_glyph.metrics.height * ft_scale;
-      ctx.strokeRect(x, y, w, h);
-    }
+    const x: number = ft_glyph.metrics.horiBearingX;
+    const y: number = ft_glyph.metrics.horiBearingY;
+    const w: number = ft_glyph.metrics.width;
+    const h: number = ft_glyph.metrics.height;
 
+    let ctx: CanvasRenderingContext2D | null = null;
+
+    let svg: SVGElement | null = null;
+
+    if (typeof document !== "undefined") {
+      const canvas: HTMLCanvasElement = document.body.appendChild(document.createElement("canvas"));
+      ctx = canvas.getContext("2d");
+
+      svg = document.body.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "svg"));
+      svg.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:xlink", "http://www.w3.org/1999/xlink");
+    }
+    
     if (ctx !== null) {
+      ctx.canvas.style.width = `${ctx.canvas.width = Math.ceil(w * ft_scale)}px`;
+      ctx.canvas.style.height = `${ctx.canvas.height = Math.ceil(h * ft_scale)}px`;
+      ctx.scale(ft_scale, ft_scale);
+      ctx.translate(-x, -(y - h));
       ctx.beginPath();
     }
 
+    if (svg !== null) {
+      svg.setAttribute("viewBox", `${x} ${y - h} ${w} ${h}`);
+      svg.setAttribute("width", `${Math.ceil(w * ft_scale)}`);
+      svg.setAttribute("height", `${Math.ceil(h * ft_scale)}`);
+    }
+
+    const svg_path_data: string[] = [];
+
     ft_error = FT.Outline_Decompose(ft_glyph.outline, {
       move_to: (to: Readonly<FT.Vector>): number => {
-        if (ctx !== null) {
-          ctx.moveTo(to.x * ft_scale, to.y * ft_scale);
-        } else {
-          console.log("M", to.x, to.y);
-        }
-        return 0;
+        if (ctx !== null) { ctx.moveTo(to.x, to.y); }
+        svg_path_data.push(`M ${to.x} ${to.y}`);
+        return FT.Err.Ok;
       },
       line_to: (to: Readonly<FT.Vector>): number => {
-        if (ctx !== null) {
-          ctx.lineTo(to.x * ft_scale, to.y * ft_scale);
-        } else {
-          console.log("L", to.x, to.y);
-        }
-        return 0;
+        if (ctx !== null) { ctx.lineTo(to.x, to.y); }
+        svg_path_data.push(`L ${to.x} ${to.y}`);
+        return FT.Err.Ok;
       },
       conic_to: (cp: Readonly<FT.Vector>, to: Readonly<FT.Vector>): number => {
-        if (ctx !== null) {
-          ctx.quadraticCurveTo(cp.x * ft_scale, cp.y * ft_scale, to.x * ft_scale, to.y * ft_scale);
-        } else {
-          console.log("Q", cp.x, cp.y, to.x, to.y);
-        }
-        return 0;
+        if (ctx !== null) { ctx.quadraticCurveTo(cp.x, cp.y, to.x, to.y); }
+        svg_path_data.push(`Q ${cp.x} ${cp.y} ${to.x} ${to.y}`);
+        return FT.Err.Ok;
       },
       cubic_to: (cp1: Readonly<FT.Vector>, cp2: Readonly<FT.Vector>, to: Readonly<FT.Vector>): number => {
-        if (ctx !== null) {
-          ctx.bezierCurveTo(cp1.x * ft_scale, cp1.y * ft_scale, cp2.x * ft_scale, cp2.y * ft_scale, to.x * ft_scale, to.y * ft_scale);
-        } else {
-          console.log("C", cp1.x, cp1.y, cp2.x, cp2.y, to.x, to.y);
-        }
-        return 0;
+        if (ctx !== null) { ctx.bezierCurveTo(cp1.x, cp1.y, cp2.x, cp2.y, to.x, to.y); }
+        svg_path_data.push(`C ${cp1.x} ${cp1.y} ${cp2.x} ${cp2.y} ${to.x} ${to.y}`);
+        return FT.Err.Ok;
       },
     });
     if (ft_error !== FT.Err.Ok) { throw new Error(FT.Error_String(ft_error)); }
@@ -160,25 +151,11 @@ export default async function main(): Promise<void> {
       ctx.fill();
     }
 
-    if (ctx !== null) {
-      ctx.translate(ft_glyph.advance.x * ft_scale, ft_glyph.advance.y * ft_scale);
+    if (svg !== null) {
+      const path: SVGPathElement = svg.appendChild(document.createElementNS("http://www.w3.org/2000/svg", "path"));
+      path.setAttribute("fill", "black");
+      path.setAttribute("d", svg_path_data.join(" "));
     }
-
-    if (prev_char !== "") {
-      const ft_kerning: FT.Vector = new FT.Vector();
-      const prev_char_code: number = prev_char.charCodeAt(0);
-      ft_error = FT.Get_Kerning(ft_face, FT.Get_Char_Index(ft_face, prev_char_code), FT.Get_Char_Index(ft_face, char_code), FT.KERNING.DEFAULT, ft_kerning);
-      if (ft_error !== FT.Err.Ok) { throw new Error(FT.Error_String(ft_error)); }
-      if ((ft_kerning.x !== 0) || (ft_kerning.y !== 0)) {
-        if (ctx !== null) {
-          ctx.translate(ft_kerning.x * ft_scale, ft_kerning.y * ft_scale);
-        } else {
-          console.log("kerning", prev_char, char, ft_kerning);
-        }
-      }
-    }
-
-    prev_char = char;
   }
 
   ft_error = FT.Done_Face(ft_face);

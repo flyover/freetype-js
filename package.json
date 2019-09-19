@@ -32,18 +32,18 @@
   },
   "homepage": "https://github.com/flyover/freetype-js#readme",
   "dependencies": {
-    "@types/emscripten": "0.0.31",
-    "@types/node": "^10.12.27",
+    "@types/emscripten": "^1.38.0",
+    "@types/node": "^12.7.5",
     "@types/systemjs": "^0.20.6"
   },
   "devDependencies": {
     "http-server": "^0.11.1",
     "node-fetch": "^2.2.0",
-    "rollup": "^0.68.2",
-    "rollup-plugin-commonjs": "^9.2.1",
+    "rollup": "^1.21.4",
+    "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-node-builtins": "^2.1.2",
-    "rollup-plugin-typescript2": "^0.18.1",
-    "source-map-support": "^0.5.10",
+    "rollup-plugin-typescript2": "^0.24.2",
+    "source-map-support": "^0.5.11",
     "systemjs": "^0.21.6",
     "typescript": "^3.3.3333"
   }
