@@ -92,13 +92,13 @@ clean-bind-freetype:
 	rm -f bind-freetype.wasm bind-freetype.wasm.*
 
 %.bc: %.c $(FREETYPE2_SOURCE_HXX)
-	emcc $(FLAGS) -I $(FREETYPE2_PATH)/include $< -o $@
+	emcc $(FLAGS) -I $(FREETYPE2_PATH)/include -c $< -o $@
 
 %.bc: %.cpp $(FREETYPE2_SOURCE_HXX)
-	emcc $(FLAGS) -I $(FREETYPE2_PATH)/include $< -o $@
+	emcc $(FLAGS) -I $(FREETYPE2_PATH)/include -c $< -o $@
 
 bind-freetype.bc: bind-freetype.cpp # $(FREETYPE2_SOURCE_HXX)
-	emcc $(FLAGS) -I $(FREETYPE2_PATH)/include --bind $< -o $@
+	emcc $(FLAGS) -I $(FREETYPE2_PATH)/include --bind -c $< -o $@
 
 bind-freetype.js: $(BIND_FREETYPE2_OUTPUT_BC) # $(FREETYPE2_OUTPUT_BC)
 	emcc $(FLAGS) -I $(FREETYPE2_PATH)/include --bind $^ -o $@
